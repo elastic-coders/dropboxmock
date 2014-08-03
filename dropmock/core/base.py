@@ -64,7 +64,6 @@ class BaseBackend(object):
     def _url_module(self):
         backend_module = self.__class__.__module__
         backend_urls_module_name = backend_module.replace("backend", "urls")
-        #TODO: review this from_list option: in djano is different..
         backend_urls_module = __import__(backend_urls_module_name, 
                                          fromlist=['url_paths'])
         return backend_urls_module
@@ -98,12 +97,6 @@ class BaseBackend(object):
 
         return paths
 
-    @property
-    def url_bases(self):
-        """
-        A list containing the url_bases extracted from urls.py
-        """
-        return self._url_module.url_bases
 
     def decorator(self, func=None):
         if not func:

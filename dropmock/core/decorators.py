@@ -7,7 +7,8 @@ from dropmock.core.utils import build_formatted_response
 
 
 def authenticate_oauth2(func):
-    ''' decorator
+    '''
+    decorate function that need oauth2 authentication
     '''
     def _authenticate_ouath2(request, url, headers, *args, **kwargs):
         bearer_token = request.headers.get('Authorization', '')
