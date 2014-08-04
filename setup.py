@@ -17,5 +17,6 @@ setup(
     url='https://github.com/elastic-coders/dropboxmock.git',
     packages=find_packages(),
     install_requires=install_requires,
+    zip_safe=True,
 )
 
