@@ -2,10 +2,7 @@
 
 from setuptools import setup, find_packages
 
-install_requires = ["httpretty==0.8.3",
-                    "requests==2.2.0",
-                    "dropbox==2.1.0",
-                    "django==1.6.1"]
+install_requires = ["httpretty==0.8.3"]
 
 import sys
 
