@@ -1,5 +1,6 @@
 from django.test import TestCase
 import dropbox
+import requests
 
 from dropmock import mock_dbx_session, mock_dbx_client
 
@@ -38,13 +39,19 @@ class SessionTestCase(TestCase):
         entries = delta.get('entries')
         self.assertEqual(delta.get('has_more'), True)
         self.assertEqual(cursor, '1st')
-        self.assertEqual(len(entries), 2)
-        self.assertEqual(entries[0], '/photo')
-        self.assertEqual(entries[1]['size'], '225.4KB')
-        self.assertEqual(entries[1]['rev'], '35e97029684fe')
-        self.assertEqual(entries[1]['thumb_exists'], False)
-        self.assertNotIn('contents', entries)
+        self.assertEqual(len(entries), 1)
+        delta_entries = entries[0]
+        self.assertEqual(delta_entries[0], '/photo')
+        self.assertEqual(delta_entries[1]['size'], '225.4KB')
+        self.assertEqual(delta_entries[1]['rev'], '35e97029684fe')
+        self.assertEqual(delta_entries[1]['thumb_exists'], False)
+        self.assertNotIn('contents', delta_entries)
         delta = dbx_client.delta(cursor=cursor)
         self.assertEqual(delta.get('cursor'), '2nd')
         self.assertEqual(delta.get('has_more'), False)
-        
+        # test sandbox for the user
+        resp = requests.get('https://api.dropbox.com/1/metadata/sandbox/',
+                            headers={'Authorization': 'Bearer {}'
+                                     .format(oauth2_token)})
+        self.assertEqual(resp.status_code, 200, resp.content)
+

@@ -13,6 +13,6 @@ def authenticate_oauth2(func):
     def _authenticate_ouath2(request, url, headers, *args, **kwargs):
         bearer_token = request.headers.get('Authorization', '')
         if bearer_token != 'Bearer ABCDEFG':
-            return build_formatted_response(status=400)
+            return build_formatted_response(status=403)
         return func(request, url, headers, *args, **kwargs)
     return wraps(func, assigned=available_attrs(func))(_authenticate_ouath2)

@@ -102,12 +102,12 @@ def get_delta(request, url, headers, *args, **kwargs):
     cursor = request.parsed_body.get('cursor', [''])
     list_metadata = request.parsed_body.get('list', [False])
     if cursor[0] == '1st':
-        body = {'entries':['/photo', _build_metadata(list_metadata)],
+        body = {'entries':[['/photo', _build_metadata(list_metadata)],],
                 'reset': False,
                 'cursor': '2nd',
                 'has_more': False}
     else:
-        body = {'entries': ['/photo', _build_metadata(list_metadata)],
+        body = {'entries': [['/photo', _build_metadata(list_metadata)],],
                 'reset': False,
                 'cursor': '1st',
                 'has_more': True}
@@ -115,3 +115,8 @@ def get_delta(request, url, headers, *args, **kwargs):
                                     headers={'content-type': 
                                              'application/json'},
                                     status=200)
+
+@authenticate_oauth2
+def sandbox(request, url, headers, *args, **kwargs):
+    # sandbox only retrieve 200 status code
+    return build_formatted_response()
