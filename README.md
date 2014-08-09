@@ -5,8 +5,8 @@ in your test.
 
 ## Usage
 
-1) pip install https://github.com/elastic-coders/dropboxmock/archive/0.0.1.zip
-or add https://github.com/elastic-coders/dropboxmock/archive/0.0.1.zip to your project requirements
+1) pip install https://github.com/elastic-coders/dropboxmock/archive/0.0.2.zip
+or add https://github.com/elastic-coders/dropboxmock/archive/0.0.2.zip to your project requirements
 
 2) decorate your test wiht @mock_dbx_session and/or mock_dbx_client (or the other depending on what you need to mock)
 
