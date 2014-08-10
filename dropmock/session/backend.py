@@ -39,5 +39,7 @@ class SessionBackend(BaseBackend):
                         state[0] if state else '')
         return ret_val
         
+    def get_oauth2_access_token_direct(self):
+        return 'ABCDEFG'
 
 dbox_session_backend = SessionBackend()
