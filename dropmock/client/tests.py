@@ -27,7 +27,6 @@ class SessionTestCase(TestCase):
         dbx_client = dropbox.client.DropboxClient(dbx_session)
         oauth2_token = dbx_client.create_oauth2_access_token()
         self.assertEqual(oauth2_token, 'ABCDEFG')
-        dbx_client.disable_access_token()
         dbx_client = dropbox.client.DropboxClient(oauth2_token)
         account_info = dbx_client.account_info()
         self.assertEqual(account_info['display_name'], 'John Doe')
@@ -50,6 +49,19 @@ class SessionTestCase(TestCase):
         self.assertEqual(delta.get('cursor'), '2nd')
         self.assertEqual(delta.get('has_more'), False)
         # test sandbox for the user
+        resp = requests.get('https://api.dropbox.com/1/metadata/sandbox/',
+                            headers={'Authorization': 'Bearer {}'
+                                     .format(oauth2_token)})
+        self.assertEqual(resp.status_code, 200, resp.content)
+        # check disable access token to disconnect session
+        dbx_client.disable_access_token()
+        resp = requests.get('https://api.dropbox.com/1/metadata/sandbox/',
+                            headers={'Authorization': 'Bearer {}'
+                                     .format(oauth2_token)})
+        self.assertEqual(resp.status_code, 403, resp.content)
+        # test reconnection
+        dbx_client = dropbox.client.DropboxClient(dbx_session)
+        oauth2_token = dbx_client.create_oauth2_access_token()
         resp = requests.get('https://api.dropbox.com/1/metadata/sandbox/',
                             headers={'Authorization': 'Bearer {}'
                                      .format(oauth2_token)})

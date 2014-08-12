@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from dropmock.core.utils import build_formatted_response
 from dropmock.core.decorators import authenticate_oauth2
-
+from dropmock.session import dbx_session_backend
 
 #TODO in next release of this package: retrieve objects 
 #that couple token and authenticated account ID
@@ -14,6 +14,9 @@ class ClientResponse(object):
 
 
 def token_from_oauth1(request, url, headers, *args, **kwargs):
+    global dbx_session_backend
+    if not dbx_session_backend.is_connected:
+        dbx_session_backend.connect()
     return build_formatted_response(body={'access_token': 'ABCDEFG', 
                                           'token_type': 'bearer'},
                                     headers={'content-type': 
@@ -22,6 +25,9 @@ def token_from_oauth1(request, url, headers, *args, **kwargs):
 
 
 def disable_access_token(request, url, headers, *args, **kwargs):
+    global dbx_session_backend
+    if dbx_session_backend.is_connected:
+        dbx_session_backend.disconnect()
     return build_formatted_response(body={},
                                     headers={'content-type': 
                                              'application/json'},

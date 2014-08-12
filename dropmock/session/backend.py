@@ -10,6 +10,10 @@ from urlparse import urlparse, parse_qs
 class SessionBackend(BaseBackend):
     
     def __init__(self, *args, **kwargs):
+        # in this release there is only one session connectable
+        #TODO: in next release handle multiple session 
+        # with multiple access token
+        self.connected = False
         super(SessionBackend, self).__init__(*args, **kwargs)
 
     def oauth2_authorize_url(self, url=''):
@@ -41,5 +45,17 @@ class SessionBackend(BaseBackend):
         
     def get_oauth2_access_token_direct(self):
         return 'ABCDEFG'
+
+    @property
+    def is_connected(self):
+        return self.connected
+
+    def connect(self):
+        # connect session
+        self.connected = True
+
+    def disconnect(self):
+        # disconnect session
+        self.connected = False
 
 dbox_session_backend = SessionBackend()
