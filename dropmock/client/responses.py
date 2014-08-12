@@ -6,8 +6,9 @@ from dropmock.core.utils import build_formatted_response
 from dropmock.core.decorators import authenticate_oauth2
 from dropmock.session import dbx_session_backend
 
-#TODO in next release of this package: retrieve objects 
-#that couple token and authenticated account ID
+#TODO in next release of this package: 
+# manage document flow for different account
+
 
 class ClientResponse(object):
 
@@ -16,6 +17,7 @@ class ClientResponse(object):
 
 
 def token_from_oauth1(request, url, headers, *args, **kwargs):
+    # mock https://api.dropbox.com/(\d+)/oauth2/token_from_oauth1
     global dbx_session_backend
     if not dbx_session_backend.is_connected(token='ABCDEFG'):
         dbx_session_backend.connect(token='ABCDEFG')
@@ -26,6 +28,7 @@ def token_from_oauth1(request, url, headers, *args, **kwargs):
                                     status=200)
 
 def disable_access_token(request, url, headers, *args, **kwargs):
+    # mock https://api.dropbox.com/(\d+)/disable_access_token
     global dbx_session_backend
     token = headers.get('access_token', '')
     oauth_token, oauth_token_secret = '', ''
@@ -49,6 +52,8 @@ def get_oauth_from_url(url):
     return oauth_token, oauth_token_secret
 
 def account_info(request, url, headers, *args, **kwargs):
+    # mock https://api.dropbox.com/(\d+)/account/info
+    #TODO: retrieve different account info depending by request token
     return build_formatted_response(body={
             'referral_link': 'https://www.dropbox.com/referrals/r1a2n3d4m5s6t7',
             'display_name': 'John Doe',
@@ -69,6 +74,7 @@ def account_info(request, url, headers, *args, **kwargs):
 
 
 def get_token(request, url, headers, *args, **kwargs):
+    # mock https://api.dropbox.com/(\d+)/oauth2/token
     global dbx_session_backend
     if not dbx_session_backend.is_connected(token='ABCDEFG'):
         dbx_session_backend.connect(token='ABCDEFG')
@@ -122,6 +128,7 @@ def _build_metadata(list_metadata):
 
 @authenticate_oauth2
 def get_delta(request, url, headers, *args, **kwargs):
+    # mock https://api.dropbox.com/(\d+)/delta
     cursor = request.parsed_body.get('cursor', [''])
     list_metadata = request.parsed_body.get('list', [False])
     if cursor[0] == '1st':
@@ -141,5 +148,6 @@ def get_delta(request, url, headers, *args, **kwargs):
 
 @authenticate_oauth2
 def sandbox(request, url, headers, *args, **kwargs):
+    # mock https://api.dropbox.com/(\d+)/metadata/sandbox
     # sandbox only retrieve 200 status code
     return build_formatted_response()

@@ -8,20 +8,25 @@ from urlparse import urlparse, parse_qs
 
 
 class SessionBackend(BaseBackend):
+    ''' This class mock the dropbox backend...
+    Session Backend manage some account info such as token, connection, etc
+    and is used by mock library to know if a session is active or not
+    and check if workflow used in test is correct 
+    '''
     ACCOUNT_STATUS_CONNECTED = 'c'
     ACCOUNT_STATUS_DISCONNECTED = 'd'
     ACCOUNT_STATUS_CHOICES = [(ACCOUNT_STATUS_CONNECTED, 'connected'),
                               (ACCOUNT_STATUS_DISCONNECTED, 'disconnected')]
     
     def __init__(self, *args, **kwargs):
-        # in this release there is only one session connectable
-        #TODO: in next release handle multiple session 
-        # with multiple access token
-        self.connected = False
+        ''' Initialize session backend and his accounts
+        '''
         self.account_list = self.init_accounts()
         super(SessionBackend, self).__init__(*args, **kwargs)
 
     def init_accounts(self):
+        '''At the moment we define 3 account for test
+        '''
         return [{'id': 1,
                  'access_token': 'ABCDEFG',
                  'oauth_token_secret': '',
@@ -42,6 +47,8 @@ class SessionBackend(BaseBackend):
                  'status': self.ACCOUNT_STATUS_DISCONNECTED},]
 
     def get_account(self, token='', oauth_token='', oauth_token_secret=''):
+        ''' function that retrieve account by oauth2 token or oauth token
+        '''
         for account in self.account_list:
             if (account['access_token'] != token and 
                 account['oauth_token'] != oauth_token):
@@ -51,6 +58,8 @@ class SessionBackend(BaseBackend):
 
 
     def is_connected(self, token='', oauth_token='', oauth_token_secret=''):
+        ''' test if a specific account is connected by his token
+        '''
         account = self.get_account(token, oauth_token, oauth_token_secret)
         return account['status'] == self.ACCOUNT_STATUS_CONNECTED
 
@@ -71,6 +80,10 @@ class SessionBackend(BaseBackend):
         account['status'] = self.ACCOUNT_STATUS_DISCONNECTED
 
     def oauth2_authorize_url(self, url=''):
+        ''' function that simulate authorize workflow
+        in your test you don't need to use webbrowser 
+        to authorize a specific token
+        '''
         assert url != ''
         parsed_url = urlparse(url, allow_fragments=True)
         query_string = parse_qs(parsed_url.query)
