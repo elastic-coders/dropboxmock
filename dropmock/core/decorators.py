@@ -12,10 +12,11 @@ def authenticate_oauth2(func):
     decorate function that need oauth2 authentication
     '''
     def _authenticate_ouath2(request, url, headers, *args, **kwargs):
-        global dbx_session_backend
-        if not dbx_session_backend.is_connected:
-            return build_formatted_response(status=403)
         bearer_token = request.headers.get('Authorization', '')
+        token = bearer_token[7:]
+        global dbx_session_backend
+        if not dbx_session_backend.is_connected(token=token):
+            return build_formatted_response(status=403)
         if bearer_token != 'Bearer ABCDEFG':
             return build_formatted_response(status=403)
         return func(request, url, headers, *args, **kwargs)

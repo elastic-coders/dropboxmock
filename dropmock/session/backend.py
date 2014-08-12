@@ -1,4 +1,4 @@
-# #!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from httpretty import HTTPretty
@@ -8,13 +8,68 @@ from urlparse import urlparse, parse_qs
 
 
 class SessionBackend(BaseBackend):
+    ACCOUNT_STATUS_CONNECTED = 'c'
+    ACCOUNT_STATUS_DISCONNECTED = 'd'
+    ACCOUNT_STATUS_CHOICES = [(ACCOUNT_STATUS_CONNECTED, 'connected'),
+                              (ACCOUNT_STATUS_DISCONNECTED, 'disconnected')]
     
     def __init__(self, *args, **kwargs):
         # in this release there is only one session connectable
         #TODO: in next release handle multiple session 
         # with multiple access token
         self.connected = False
+        self.account_list = self.init_accounts()
         super(SessionBackend, self).__init__(*args, **kwargs)
+
+    def init_accounts(self):
+        return [{'id': 1,
+                 'access_token': 'ABCDEFG',
+                 'oauth_token_secret': '',
+                 'oauth_token': '', 
+                 'token_oauth_type': 2,
+                 'status': self.ACCOUNT_STATUS_DISCONNECTED},
+                {'id': 2,
+                 'access_token': '',
+                 'oauth_token_secret': '95grkd9na7hm',
+                 'oauth_token': 'ccl4li5n1q9b', 
+                 'token_oauth_type': 1,
+                 'status': self.ACCOUNT_STATUS_DISCONNECTED},
+                {'id': 3,
+                 'access_token': '',
+                 'oauth_token_secret': 'b9q1n5il4lcc',
+                 'oauth_token': 'mh7an9dkrg59', 
+                 'token_oauth_type': 1,
+                 'status': self.ACCOUNT_STATUS_DISCONNECTED},]
+
+    def get_account(self, token='', oauth_token='', oauth_token_secret=''):
+        for account in self.account_list:
+            if (account['access_token'] != token and 
+                account['oauth_token'] != oauth_token and
+                account['oauth_token_secret'] != oauth_token_secret):
+                continue
+            return account
+        return None
+
+
+    def is_connected(self, token='', oauth_token='', oauth_token_secret=''):
+        account = self.get_account(token, oauth_token, oauth_token_secret)
+        return account['status'] == self.ACCOUNT_STATUS_CONNECTED
+
+    def connect(self, token='', oauth_token='', oauth_token_secret=''):
+        # connect session
+        account = self.get_account(token, oauth_token, oauth_token_secret)
+        if not account:
+            raise ValueError('account not existent {}'\
+                                 .format(token if token != '' else oauth_token))
+        account['status'] = self.ACCOUNT_STATUS_CONNECTED
+
+    def disconnect(self, token='', oauth_token='', oauth_token_secret=''):
+        # disconnect session
+        account = self.get_account(token, oauth_token, oauth_token_secret)
+        if not account:
+            raise ValueError('account not existent {}'\
+                                 .format(token if token != '' else oauth_token))
+        account['status'] = self.ACCOUNT_STATUS_DISCONNECTED
 
     def oauth2_authorize_url(self, url=''):
         assert url != ''
@@ -41,21 +96,10 @@ class SessionBackend(BaseBackend):
             ret_val = '{}?code=ABCDEFG&uid={}&state={}'\
                 .format(redirect_uri[0],
                         state[0] if state else '')
+        self.connect()
         return ret_val
         
     def get_oauth2_access_token_direct(self):
         return 'ABCDEFG'
-
-    @property
-    def is_connected(self):
-        return self.connected
-
-    def connect(self):
-        # connect session
-        self.connected = True
-
-    def disconnect(self):
-        # disconnect session
-        self.connected = False
 
 dbox_session_backend = SessionBackend()

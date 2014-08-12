@@ -1,5 +1,7 @@
 # #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from urlparse import urlparse, parse_qs
+
 from dropmock.core.utils import build_formatted_response
 from dropmock.core.decorators import authenticate_oauth2
 from dropmock.session import dbx_session_backend
@@ -15,24 +17,34 @@ class ClientResponse(object):
 
 def token_from_oauth1(request, url, headers, *args, **kwargs):
     global dbx_session_backend
-    if not dbx_session_backend.is_connected:
-        dbx_session_backend.connect()
+    if not dbx_session_backend.is_connected(token='ABCDEFG'):
+        dbx_session_backend.connect(token='ABCDEFG')
     return build_formatted_response(body={'access_token': 'ABCDEFG', 
                                           'token_type': 'bearer'},
                                     headers={'content-type': 
                                              'application/json'},
                                     status=200)
 
-
 def disable_access_token(request, url, headers, *args, **kwargs):
     global dbx_session_backend
-    if dbx_session_backend.is_connected:
-        dbx_session_backend.disconnect()
+    token = headers.get('access_token', '')
+    oauth_token, oauth_token_secret = '', ''
+    if token == '':
+        oauth_token, oauth_token_secret = get_oauth_from_url(url)
+    dbx_session_backend.disconnect(token=token, 
+                                   oauth_token=oauth_token,
+                                   oauth_token_secret=oauth_token_secret)
     return build_formatted_response(body={},
                                     headers={'content-type': 
                                              'application/json'},
                                     status=200)
 
+def get_oauth_from_url(url):
+    parsed_url = urlparse(url, allow_fragments=True)
+    query_string = parse_qs(parsed_url.query)
+    oauth_token = query_string.get('oauth_token', '')
+    oauth_token_secret = query_string.get('oauth_token_sercet', '')
+    return oauth_token, oauth_token_secret
 
 def account_info(request, url, headers, *args, **kwargs):
     return build_formatted_response(body={
@@ -55,6 +67,9 @@ def account_info(request, url, headers, *args, **kwargs):
 
 
 def get_token(request, url, headers, *args, **kwargs):
+    global dbx_session_backend
+    if not dbx_session_backend.is_connected(token='ABCDEFG'):
+        dbx_session_backend.connect(token='ABCDEFG')
     return build_formatted_response(body={'access_token': 'ABCDEFG', 
                                           'token_type': 'bearer', 
                                           'uid': '12345'},
