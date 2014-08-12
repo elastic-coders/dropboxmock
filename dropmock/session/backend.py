@@ -44,8 +44,7 @@ class SessionBackend(BaseBackend):
     def get_account(self, token='', oauth_token='', oauth_token_secret=''):
         for account in self.account_list:
             if (account['access_token'] != token and 
-                account['oauth_token'] != oauth_token and
-                account['oauth_token_secret'] != oauth_token_secret):
+                account['oauth_token'] != oauth_token):
                 continue
             return account
         return None

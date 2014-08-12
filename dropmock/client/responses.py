@@ -31,6 +31,8 @@ def disable_access_token(request, url, headers, *args, **kwargs):
     oauth_token, oauth_token_secret = '', ''
     if token == '':
         oauth_token, oauth_token_secret = get_oauth_from_url(url)
+        if ((oauth_token == '') and (request.parsed_body not in ['', None])):
+            oauth_token = request.parsed_body.get('oauth_token', '')
     dbx_session_backend.disconnect(token=token, 
                                    oauth_token=oauth_token,
                                    oauth_token_secret=oauth_token_secret)
