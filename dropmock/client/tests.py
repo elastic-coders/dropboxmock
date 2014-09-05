@@ -1,6 +1,8 @@
-from django.test import TestCase
 import dropbox
 import requests
+import datetime
+
+from django.test import TestCase
 
 from dropmock import mock_dbx_session, mock_dbx_client
 
@@ -66,4 +68,8 @@ class SessionTestCase(TestCase):
                             headers={'Authorization': 'Bearer {}'
                                      .format(oauth2_token)})
         self.assertEqual(resp.status_code, 200, resp.content)
-
+        dbx_client = dropbox.client.DropboxClient(oauth2_token)
+        media = dbx_client.media('/photo/mypdf.pdf')
+        self.assertRegexpMatches(media['url'],
+                                 r'^https://dl.dropboxusercontent.com/(\d+)/view/([a-z]+)/([a-z]+)')
+        self.assertIn('expires', media)

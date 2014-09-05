@@ -1,5 +1,8 @@
 # #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+import datetime
+
 from urlparse import urlparse, parse_qs
 
 from dropmock.core.utils import build_formatted_response
@@ -151,3 +154,26 @@ def sandbox(request, url, headers, *args, **kwargs):
     # mock https://api.dropbox.com/(\d+)/metadata/sandbox
     # sandbox only retrieve 200 status code
     return build_formatted_response()
+
+@authenticate_oauth2
+def get_media(request, url, headers, *args, **kwargs):
+    # mock https://api.dropbox.com/(\d+)/media/auto/
+    body = {'url': 
+            'https://dl.dropboxusercontent.com/1/view/abcdefghijk/example',
+            'expires': (datetime.datetime.now()+datetime\
+                .timedelta(hours=2)).isoformat(' ')}
+    return build_formatted_response(body=body,
+                                    headers={'content-type': 
+                                             'application/json'},
+                                    status=200)
+
+@authenticate_oauth2
+def put_file(request, url, headers, *args, **kwargs):
+    # mock https://api-content.dropbox.com/(\d+)/files_put/([a-zA-Z]+)/([a-zA-Z]+)
+    global dbx_session_backend
+    #TODO: get document file path (not only name) from url
+    # and manage it in a session backend dictionary
+    return build_formatted_response(body=body,
+                                    headers={'content-type': 
+                                             'application/json'},
+                                    status=200)
