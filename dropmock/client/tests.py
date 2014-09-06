@@ -90,4 +90,6 @@ class ClientTestCase(TestCase):
         # self.assertEqual(sample_file.read(), new_file.read())
         resp3 = dbx_client.file_delete(full_path)
         self.assertEqual(resp3, resp1)
+        move_to = 'imported/{}'.format(full_path2)
+        resp_moved = dbx_client.file_move(full_path2, move_to)
 

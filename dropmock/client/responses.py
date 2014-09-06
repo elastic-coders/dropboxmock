@@ -222,3 +222,22 @@ def delete_file(request, url, headers, *args, **kwargs):
                                     headers={'content-type': 
                                              'application/json'},
                                     status=200)
+
+@authenticate_oauth2
+def move_file(request, url, headers, *args, **kwargs):
+    if request.method != 'POST':
+        return build_formatted_response(body='method_not_allowed',
+                                       status=400)
+    #TODO for the moment root path is always auto....
+    # we have to handle this info in client backend!!!!
+    from_path = 'auto{}'.format(request.parsed_body['from_path'][0])
+    to_path = 'auto{}'.format(request.parsed_body['to_path'][0])
+    global dbx_client_backend
+    moved_file = dbx_client_backend.move_file(from_path, to_path)
+    if not moved_file:
+        return build_formatted_response(status=404)
+    return build_formatted_response(body=moved_file['metadata'], 
+                                    headers={'content-type': 
+                                             'application/json'},
+                                    status=200)
+    

@@ -76,5 +76,13 @@ class ClientBackend(BaseBackend):
                 return file_data
         return None
 
+    def move_file(self, from_path, to_path):
+        file_to_move = self.get_file_from_backend(from_path)
+        if not file_to_move:
+            return None
+        file_to_move['name'] = to_path
+        file_to_move['metadata']['path'] = to_path
+        # so we are sure that backend was modified!
+        return self.get_file_from_backend(to_path)
 
 dbox_client_backend = ClientBackend()

@@ -66,4 +66,8 @@ def normalize_file_name(file_name):
     "/1/files_put/auto/test/test.txt" becomes "auto/test/test.txt"
     '''
     file_name_parts = file_name.split('/')
+    if file_name_parts[0] == 'auto':
+        # in this case the name is already normalized
+        # when root will be handled this statements become == self.root
+        return file_name
     return '/'.join(file_name_parts[3:])
