@@ -1,6 +1,7 @@
 import dropbox
 import requests
 import datetime
+import os
 
 from django.test import TestCase
 
@@ -9,7 +10,7 @@ from dropmock import mock_dbx_session, mock_dbx_client
 DROPBOX_CLIENT_ID_FAKE = 'p5sqcubc8ndn70x'
 DROPBOX_CLIENT_SECRET_FAKE = '8a44il5xhkoize6'
 
-class SessionTestCase(TestCase):
+class ClientTestCase(TestCase):
 
     @mock_dbx_session
     @mock_dbx_client
@@ -73,3 +74,19 @@ class SessionTestCase(TestCase):
         self.assertRegexpMatches(media['url'],
                                  r'^https://dl.dropboxusercontent.com/(\d+)/view/([a-z]+)/([a-z]+)')
         self.assertIn('expires', media)
+        path, _ = os.path.split(os.path.realpath(__file__))
+        sample_file = open('{}/data/test.txt'\
+                               .format(path), 'r')
+        full_path = '/test/test.txt'
+        # TODO: test using dropbox command
+        resp1 = dbx_client.put_file(full_path, sample_file)
+        sample_file2 = open('{}/data/test2.txt'\
+                               .format(path), 'r')
+        full_path2 = '/test/test2.txt'
+        resp2 = dbx_client.put_file(full_path2, sample_file2)
+        self.assertNotEqual(resp1, resp2)
+        # new_file = dbx_client.get_file(full_path)
+        # self.assertEqual(sample_file.read(), new_file.read())
+        resp3 = dbx_client.file_delete(full_path)
+        self.assertEqual(resp3, resp1)
+

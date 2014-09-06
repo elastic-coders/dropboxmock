@@ -8,7 +8,9 @@ from .responses import (token_from_oauth1,
                         get_delta,
                         sandbox,
                         get_media,
-                        put_file)
+                        put_file,
+                        get_file,
+                        delete_file)
 
 # the (\d+) parameter in urls is the api version info
 
@@ -27,5 +29,9 @@ url_paths = [{'https://api.dropbox.com/(\d+)/oauth2/token_from_oauth1$':
              {'https://api.dropbox.com/(\d+)/media/([a-zA-Z]+)/([a-zA-Z]+)':
                   get_media},
              {'https://api-content.dropbox.com/(\d+)/files_put/([a-zA-Z]+)/([a-zA-Z]+)':
-                  put_file},]
+                  put_file},
+             {'https://api-content.dropbox.com/(\d+)/files/([a-zA-Z]+)/([a-zA-Z]+)':
+                  get_file},
+             {'https://api.dropbox.com/(\d+)/fileops/delete$':
+                  delete_file},]
 

@@ -8,6 +8,7 @@ from urlparse import urlparse, parse_qs
 from dropmock.core.utils import build_formatted_response
 from dropmock.core.decorators import authenticate_oauth2
 from dropmock.session import dbx_session_backend
+from dropmock.client import dbx_client_backend
 
 #TODO in next release of this package: 
 # manage document flow for different account
@@ -170,10 +171,49 @@ def get_media(request, url, headers, *args, **kwargs):
 @authenticate_oauth2
 def put_file(request, url, headers, *args, **kwargs):
     # mock https://api-content.dropbox.com/(\d+)/files_put/([a-zA-Z]+)/([a-zA-Z]+)
-    global dbx_session_backend
+    global dbx_client_backend
+    url_parse = urlparse(request.path)
+    file_full_path = url_parse.path
+    overwrite = parse_qs(url_parse.query).get('overwrite', False)
+    # here file_full_path looks like /1/files_put/auto/test/test.txt
+
+    file_obj = request.rfile
+    dropbox_file = dbx_client_backend\
+        .add_file_to_backend(file_full_path, file_obj, overwrite=overwrite)
     #TODO: get document file path (not only name) from url
     # and manage it in a session backend dictionary
-    return build_formatted_response(body=body,
+    return build_formatted_response(body=dropbox_file,
+                                    headers={'content-type': 
+                                             'application/json'},
+                                    status=200)
+
+@authenticate_oauth2
+def get_file(request, url, headers, *args, **kwargs):
+    # mock https://api-content.dropbox.com/(\d+)/files/([a-zA-Z]+)/([a-zA-Z]+)
+    if request.method != 'GET':
+        return build_formatted_response(body='method not allowed',
+                                        status=400)
+    global dbx_client_backend
+    url_parse = urlparse(request.path)
+    file_full_path = url_parse.path
+    dropbox_file = dbx_client_backend.get_file_from_backend(file_full_path)
+    if not dropbox_file:
+        return build_formatted_response(status=404)
+    #FIXME: httpretty in this case doesn't work!! :-(
+    return dropbox_file['file']
+
+@authenticate_oauth2
+def delete_file(request, url, headers, *args, **kwargs):
+    if request.method != 'POST':
+        return build_formatted_response(body='method_not_allowed',
+                                       status=400)
+    global dbx_client_backend
+    file_path = '{}{}'.format(request.parsed_body['root'][0],
+                               request.parsed_body['path'][0])
+    file_deleted_response = dbx_client_backend.delete_file(file_path)
+    if not file_deleted_response:
+        return build_formatted_response(status=404)
+    return build_formatted_response(body=file_deleted_response['metadata'], 
                                     headers={'content-type': 
                                              'application/json'},
                                     status=200)
