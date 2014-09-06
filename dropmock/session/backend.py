@@ -112,6 +112,8 @@ class SessionBackend(BaseBackend):
         return ret_val
         
     def get_oauth2_access_token_direct(self):
-        return 'ABCDEFG'
+        token = 'ABCDEFG'
+        self.connect(token=token)
+        return token
 
 dbox_session_backend = SessionBackend()

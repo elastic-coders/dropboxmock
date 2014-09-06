@@ -5,7 +5,7 @@ import datetime
 
 from urlparse import urlparse, parse_qs
 
-from dropmock.core.utils import build_formatted_response
+from dropmock.core.utils import build_formatted_response, normalize_file_name
 from dropmock.core.decorators import authenticate_oauth2
 from dropmock.session import dbx_session_backend
 from dropmock.client import dbx_client_backend
@@ -159,10 +159,15 @@ def sandbox(request, url, headers, *args, **kwargs):
 @authenticate_oauth2
 def get_media(request, url, headers, *args, **kwargs):
     # mock https://api.dropbox.com/(\d+)/media/auto/
+    # expires: the url is valid 4 hours, 
+    # look at https://www.dropbox.com/developers/core/docs#media
+    file_full_path = urlparse(request.path).path
+    file_path = normalize_file_name(file_full_path)
     body = {'url': 
-            'https://dl.dropboxusercontent.com/1/view/abcdefghijk/example',
+            'https://dl.dropboxusercontent.com/1/view/{}'\
+                .format(file_path),
             'expires': (datetime.datetime.now()+datetime\
-                .timedelta(hours=2)).isoformat(' ')}
+                .timedelta(hours=4)).isoformat(' ')}
     return build_formatted_response(body=body,
                                     headers={'content-type': 
                                              'application/json'},
