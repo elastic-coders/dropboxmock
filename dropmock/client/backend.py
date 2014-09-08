@@ -4,6 +4,7 @@
 import os
 import uuid
 import datetime
+import copy
 
 from httpretty import HTTPretty
 
@@ -49,7 +50,8 @@ class ClientBackend(BaseBackend):
                    'icon': '',
                    'root': 'dropbox',
                    'mime_type': get_mime_type(file_name_key),
-                   'revision': 0}
+                   'revision': 0,
+                   'is_deleted': False}
         if file_data:
             file_data['metadata'] = ret_val
             file_data['file'] = file_obj
@@ -64,15 +66,18 @@ class ClientBackend(BaseBackend):
         assert file_name_key is not None
         file_name_key = normalize_file_name(file_name_key)
         for file_data in self.file_list:
-            if file_data['name'] == file_name_key:
+            if (file_data['name'] == file_name_key and 
+                not file_data['metadata']['is_deleted']):
                 return file_data
         return None
 
     def delete_file(self, file_name_key):
         assert file_name_key is not None
         for file_data in self.file_list:
-            if file_data['name'] == file_name_key:
-                self.file_list.remove(file_data)
+            if (file_data['name'] == file_name_key and
+                not file_data['metadata']['is_deleted']):
+                # self.file_list.remove(file_data)
+                file_data['metadata']['is_deleted'] = True
                 return file_data
         return None
 
@@ -80,9 +85,30 @@ class ClientBackend(BaseBackend):
         file_to_move = self.get_file_from_backend(from_path)
         if not file_to_move:
             return None
-        file_to_move['name'] = to_path
-        file_to_move['metadata']['path'] = to_path
+        copy_file = copy.deepcopy(file_to_move)
+        file_to_move['is_deleted'] = True
+        copy_file['name'] = to_path
+        copy_file['metadata']['path'] = to_path
+        self.file_list.append(copy_file)
         # so we are sure that backend was modified!
         return self.get_file_from_backend(to_path)
+
+    def metadata(self, file_full_path, list_content, 
+                 include_deleted, file_limit):
+        ret_val = {'size': 0,
+                   'hash': '37eb1ba1849d4b0fb0b28caf7ef3af52',
+                   'bytes': 0,
+                   'thumb_exists': False,
+                   "rev": "714f029684fe",
+                   'modified': 'Wed, 09 Sep 2014 22:18:51 +0000',
+                   'path': '/Photos',
+                   'is_dir': true,
+                   'icon': 'folder',
+                   'root': 'dropbox',
+                   'revision': 41642}
+        if list_content:
+            ret_val['content'] = {}
+            for file_data in self.file_list:
+                ret_val['content'].extend(file_data['metadata'])
 
 dbox_client_backend = ClientBackend()

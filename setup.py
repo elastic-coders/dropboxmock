@@ -8,7 +8,7 @@ import sys
 
 setup(
     name='dropboxmock',
-    version='0.2.1',
+    version='0.2.2',
     description='dropboxmock is a simple library '
     'that allow you to mock dropbox library '
     'in your code',

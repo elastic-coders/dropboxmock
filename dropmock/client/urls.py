@@ -11,7 +11,8 @@ from .responses import (token_from_oauth1,
                         put_file,
                         get_file,
                         delete_file,
-                        move_file)
+                        move_file,
+                        metadata)
 
 # the (\d+) parameter in urls is the api version info
 
@@ -36,5 +37,7 @@ url_paths = [{'https://api.dropbox.com/(\d+)/oauth2/token_from_oauth1$':
              {'https://api.dropbox.com/(\d+)/fileops/delete$':
                   delete_file},
              {'https://api.dropbox.com/(\d+)/fileops/move$':
-                  move_file},]
+                  move_file},
+             {'https://api.dropbox.com/(\d+)/metadata/([a-zA-Z]+)/([a-zA-Z]+)':
+                  metadata},]
 

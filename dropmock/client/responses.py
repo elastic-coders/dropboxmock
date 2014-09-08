@@ -241,3 +241,24 @@ def move_file(request, url, headers, *args, **kwargs):
                                              'application/json'},
                                     status=200)
     
+@authenticate_oauth2
+def metadata(request, url, headers, *args, **kwargs):
+    if request.method != 'GET':
+        return build_formatted_response(body='method not allowed',
+                                        status=400)
+    global dbx_client_backend
+    file_full_path = urlparse(request.path).path
+    list_content = request.parsed_body.get('list', True)
+    include_deleted = request.parsed_body.get('include_deleted', True)
+    file_limit = request.parsed_body.get('file_limit', 25000)
+    ret_val = dbx_client_backend.metedata(file_full_path, 
+                                          list_content, 
+                                          include_deleted, 
+                                          file_limit)
+    if not ret_val:
+        return build_formatted_response(status=404)
+    return build_formatted_response(body=ret_val,
+                                    headers={'content-type': 
+                                             'application/json'},
+                                    status=200)
+
