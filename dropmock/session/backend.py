@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import uuid
 
 from httpretty import HTTPretty
 
@@ -21,6 +22,7 @@ class SessionBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         ''' Initialize session backend and his accounts
         '''
+        self.session_id = uuid.uuid4()
         self.account_list = self.init_accounts()
         super(SessionBackend, self).__init__(*args, **kwargs)
 
