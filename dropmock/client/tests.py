@@ -96,4 +96,7 @@ class ClientTestCase(TestCase):
         self.assertEqual(resp3, resp1)
         move_to = 'imported/{}'.format(full_path2)
         resp_moved = dbx_client.file_move(full_path2, move_to)
+        metadata_file1 = dbx_client.metadata(full_path, list=True, 
+                                             include_deleted=True)
+        print metadata_file1
 

@@ -71,3 +71,7 @@ def normalize_file_name(file_name):
         # when root will be handled this statements become == self.root
         return file_name
     return '/'.join(file_name_parts[3:])
+
+def is_str_file_format(file_name):
+    _, ext = os.path.splitext(file_name)
+    return not ext in ['', None]

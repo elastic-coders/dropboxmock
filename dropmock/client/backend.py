@@ -9,7 +9,8 @@ import copy
 from httpretty import HTTPretty
 
 from dropmock.core.base import BaseBackend
-from dropmock.core.utils import get_mime_type, human_size, normalize_file_name
+from dropmock.core.utils import (get_mime_type, human_size, 
+                                 normalize_file_name, is_str_file_format)
 
 
 class ClientBackend(BaseBackend):
@@ -86,29 +87,42 @@ class ClientBackend(BaseBackend):
         if not file_to_move:
             return None
         copy_file = copy.deepcopy(file_to_move)
-        file_to_move['is_deleted'] = True
         copy_file['name'] = to_path
         copy_file['metadata']['path'] = to_path
         self.file_list.append(copy_file)
+        self.delete_file(from_path)
         # so we are sure that backend was modified!
         return self.get_file_from_backend(to_path)
 
     def metadata(self, file_full_path, list_content, 
                  include_deleted, file_limit):
-        ret_val = {'size': 0,
-                   'hash': '37eb1ba1849d4b0fb0b28caf7ef3af52',
-                   'bytes': 0,
-                   'thumb_exists': False,
-                   "rev": "714f029684fe",
-                   'modified': 'Wed, 09 Sep 2014 22:18:51 +0000',
-                   'path': '/Photos',
-                   'is_dir': true,
-                   'icon': 'folder',
-                   'root': 'dropbox',
-                   'revision': 41642}
-        if list_content:
-            ret_val['content'] = {}
+        file_full_path = normalize_file_name(file_full_path)
+        if is_str_file_format(file_full_path):
             for file_data in self.file_list:
-                ret_val['content'].extend(file_data['metadata'])
+                if ((not file_data['metadata']['is_deleted'] or 
+                     include_deleted) and
+                    file_data['name'] == file_full_path):
+                    return file_data['metadata']
+            return None
+        else:
+            ret_val = {'size': 0,
+                       'hash': '37eb1ba1849d4b0fb0b28caf7ef3af52',
+                       'bytes': 0,
+                       'thumb_exists': False,
+                       "rev": "714f029684fe",
+                       'modified': 'Wed, 09 Sep 2014 22:18:51 +0000',
+                       'path': '/Photos',
+                       'is_dir': True,
+                       'icon': 'folder',
+                       'root': 'dropbox',
+                       'revision': 41642}
+            if list_content:
+                ret_val['content'] = []
+                for file_data in self.file_list:
+                    if ((not file_data['metadata']['is_deleted'] or 
+                         include_deleted) and
+                        file_data['name'].startswith(file_full_path)):
+                        ret_val['content'].append(file_data['metadata'])
+            return ret_val
 
 dbox_client_backend = ClientBackend()
