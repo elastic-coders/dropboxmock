@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-install_requires = ["httpretty==0.8.3"]
+install_requires = ["httpretty==0.8.3", "pytz==2014.3"]
 
 import sys
 
