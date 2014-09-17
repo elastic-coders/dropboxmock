@@ -75,6 +75,7 @@ class ClientTestCase(TestCase):
                                  r'^https://dl.dropboxusercontent.com/(\d+)/view/([a-z]+)')
         self.assertEqual(media['url'], 'https://dl.dropboxusercontent.com/1/view/auto/photo/mypdf.pdf')
         self.assertIn('expires', media)
+        print media['expires']
         path, _ = os.path.split(os.path.realpath(__file__))
         sample_file = open('{}/data/test.txt'\
                                .format(path), 'r')
