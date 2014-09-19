@@ -169,7 +169,7 @@ def get_media(request, url, headers, *args, **kwargs):
                 .format(file_path),
             'expires': (datetime.datetime.utcnow()\
                             .replace(tzinfo=pytz.utc)+datetime\
-                .timedelta(hours=4)).strftime('%Y-%m-%dT%H:%M:%S.%f')}
+                .timedelta(hours=4)).strftime('%a, %d %b %Y %H:%M:%S %z')}
     return build_formatted_response(body=body,
                                     headers={'content-type': 
                                              'application/json'},
